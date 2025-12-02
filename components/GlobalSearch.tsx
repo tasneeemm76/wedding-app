@@ -102,15 +102,15 @@ export default function GlobalSearch() {
 
   return (
     <>
-      <form onSubmit={handleSearch} className="flex-1 max-w-md mx-4">
+      <form onSubmit={handleSearch} className="w-full">
         <div className="relative">
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Search guest by name..."
+            placeholder="Search guest..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 pl-10 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="w-full px-3 sm:px-4 py-2 pl-9 sm:pl-10 pr-9 sm:pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm min-h-[44px] sm:min-h-0"
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <svg
@@ -144,15 +144,16 @@ export default function GlobalSearch() {
             ref={modalRef}
             className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
           >
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">Guest Details</h2>
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center z-10">
+              <h2 className="text-lg sm:text-2xl font-bold text-gray-900">Guest Details</h2>
               <button
                 onClick={() => {
                   setShowModal(false)
                   setSearchResult(null)
                   setSearchQuery('')
                 }}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 p-1 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                aria-label="Close"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -160,31 +161,31 @@ export default function GlobalSearch() {
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
               {/* Guest Summary Card */}
-              <div className="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">{searchResult.guest.name}</h3>
-                <div className="grid grid-cols-3 gap-4">
+              <div className="bg-indigo-50 rounded-lg p-3 sm:p-4 border border-indigo-200">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">{searchResult.guest.name}</h3>
+                <div className="grid grid-cols-3 gap-3 sm:gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Ladies</p>
-                    <p className="text-2xl font-bold text-indigo-600">{searchResult.guest.ladies}</p>
+                    <p className="text-xs sm:text-sm text-gray-600">Ladies</p>
+                    <p className="text-xl sm:text-2xl font-bold text-indigo-600">{searchResult.guest.ladies}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Gents</p>
-                    <p className="text-2xl font-bold text-indigo-600">{searchResult.guest.gents}</p>
+                    <p className="text-xs sm:text-sm text-gray-600">Gents</p>
+                    <p className="text-xl sm:text-2xl font-bold text-indigo-600">{searchResult.guest.gents}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Children</p>
-                    <p className="text-2xl font-bold text-indigo-600">{searchResult.guest.children}</p>
+                    <p className="text-xs sm:text-sm text-gray-600">Children</p>
+                    <p className="text-xl sm:text-2xl font-bold text-indigo-600">{searchResult.guest.children}</p>
                   </div>
                 </div>
               </div>
 
               {/* RSVP Status */}
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">RSVP Received:</span>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  <span className="text-xs sm:text-sm font-medium text-gray-700">RSVP Received:</span>
+                  <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
                     searchResult.hasRSVP
                       ? 'bg-green-100 text-green-800'
                       : 'bg-gray-200 text-gray-600'
@@ -196,12 +197,12 @@ export default function GlobalSearch() {
 
               {/* Per-Function Overview */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Function Overview</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Function Overview</h3>
                 <div className="space-y-3">
                   {searchResult.functionOverview.map((overview) => (
                     <div
                       key={overview.functionId}
-                      className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                      className="border rounded-lg p-3 sm:p-4 hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -243,11 +244,11 @@ export default function GlobalSearch() {
 
               {/* All Notes Section */}
               {searchResult.allRSVPNotes.length > 0 && (
-                <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-                  <h3 className="text-sm font-semibold text-yellow-900 mb-2">All Notes</h3>
+                <div className="bg-yellow-50 rounded-lg p-3 sm:p-4 border border-yellow-200">
+                  <h3 className="text-xs sm:text-sm font-semibold text-yellow-900 mb-2">All Notes</h3>
                   <div className="space-y-2">
                     {searchResult.allRSVPNotes.map((note, index) => (
-                      <div key={index} className="text-sm">
+                      <div key={index} className="text-xs sm:text-sm">
                         <span className="font-medium text-yellow-900">{note.functionName}:</span>
                         <span className="text-yellow-800 ml-2">{note.notes}</span>
                       </div>

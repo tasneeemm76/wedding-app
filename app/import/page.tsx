@@ -86,10 +86,10 @@ export default function ImportPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Import Guests from Excel</h1>
+      <div className="max-w-3xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">Import Guests from Excel</h1>
         
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="bg-white shadow rounded-lg p-4 sm:p-6">
           <div className="mb-4">
             <h2 className="text-lg font-medium text-gray-900 mb-2">File Format</h2>
             <p className="text-sm text-gray-600 mb-2">

@@ -46,13 +46,13 @@ export default async function FunctionDetailPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">{func.name}</h1>
-          <div className="mt-2 text-sm text-gray-600">
-            {func.type && <span>Type: {func.type}</span>}
+      <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+        <div className="mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{func.name}</h1>
+          <div className="mt-2 text-xs sm:text-sm text-gray-600 space-y-1 sm:space-y-0 sm:space-x-4">
+            {func.type && <span className="block sm:inline">Type: {func.type}</span>}
             {func.date && (
-              <span className="ml-4">
+              <span className="block sm:inline">
                 Date: {new Date(func.date).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
@@ -60,7 +60,7 @@ export default async function FunctionDetailPage({
                 })}
               </span>
             )}
-            {func.venue && <span className="ml-4">Venue: {func.venue}</span>}
+            {func.venue && <span className="block sm:inline">Venue: {func.venue}</span>}
           </div>
         </div>
         <FunctionInviteManager

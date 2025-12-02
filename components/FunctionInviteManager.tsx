@@ -205,13 +205,13 @@ export default function FunctionInviteManager({
 
   return (
     <div className="bg-white shadow rounded-lg">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Manage Invites</h2>
+      <div className="p-3 sm:p-4 border-b border-gray-200">
+        <h2 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Manage Invites</h2>
         
         {/* Search/Add Guest Section */}
         {availableGuests.length > 0 && (
-          <div className="mb-6">
-            <div className="relative mb-4" ref={searchRef}>
+          <div className="mb-4 sm:mb-6">
+            <div className="relative mb-3 sm:mb-4" ref={searchRef}>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Search and Add Guest
               </label>
@@ -224,7 +224,7 @@ export default function FunctionInviteManager({
                 }}
                 onFocus={() => setShowSearchResults(searchQuery.length > 0)}
                 placeholder="Type guest name to search..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm min-h-[44px] sm:min-h-0"
               />
               {showSearchResults && filteredGuests.length > 0 && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
@@ -232,10 +232,10 @@ export default function FunctionInviteManager({
                     <button
                       key={guest.id}
                       onClick={() => handleAddGuest(guest.id)}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
+                      className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-2 hover:bg-gray-100 border-b border-gray-100 last:border-b-0 min-h-[44px] sm:min-h-0"
                     >
-                      <div className="font-medium text-gray-900">{guest.name}</div>
-                      <div className="text-sm text-gray-500">
+                      <div className="font-medium text-gray-900 text-sm sm:text-base">{guest.name}</div>
+                      <div className="text-xs sm:text-sm text-gray-500">
                         {guest.ladies} Ladies, {guest.gents} Gents, {guest.children} Children
                       </div>
                     </button>
@@ -243,7 +243,7 @@ export default function FunctionInviteManager({
                 </div>
               )}
               {showSearchResults && searchQuery.length > 0 && filteredGuests.length === 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-4 text-sm text-gray-500">
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-3 sm:p-4 text-xs sm:text-sm text-gray-500">
                   No guests found matching "{searchQuery}"
                 </div>
               )}
@@ -254,20 +254,20 @@ export default function FunctionInviteManager({
         {/* Uninvited Guests with Checkboxes */}
         {availableGuests.length > 0 && (
           <div className="mb-4">
-            <div className="flex justify-between items-center mb-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
               <h3 className="text-sm font-medium text-gray-700">
                 Uninvited Guests ({availableGuests.length})
               </h3>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 <button
                   onClick={handleSelectAll}
-                  className="px-3 py-1.5 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  className="flex-1 sm:flex-none px-3 py-2 text-xs sm:text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 min-h-[44px] sm:min-h-0"
                 >
                   Select All
                 </button>
                 <button
                   onClick={handleUnselectAll}
-                  className="px-3 py-1.5 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  className="flex-1 sm:flex-none px-3 py-2 text-xs sm:text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 min-h-[44px] sm:min-h-0"
                 >
                   Unselect All
                 </button>
@@ -275,7 +275,7 @@ export default function FunctionInviteManager({
                   <button
                     onClick={handleAddSelectedGuests}
                     disabled={addingGuests}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 text-sm"
+                    className="flex-1 sm:flex-none px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 text-xs sm:text-sm font-medium min-h-[44px] sm:min-h-0"
                   >
                     {addingGuests ? 'Adding...' : `Add Selected (${selectedGuestIds.size})`}
                   </button>
@@ -286,17 +286,17 @@ export default function FunctionInviteManager({
               {availableGuests.map(guest => (
                 <label
                   key={guest.id}
-                  className="flex items-center px-4 py-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 cursor-pointer"
+                  className="flex items-center px-3 sm:px-4 py-2.5 sm:py-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 cursor-pointer min-h-[60px] sm:min-h-0"
                 >
                   <input
                     type="checkbox"
                     checked={selectedGuestIds.has(guest.id)}
                     onChange={() => handleToggleGuest(guest.id)}
-                    className="mr-3 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    className="mr-3 h-5 w-5 sm:h-4 sm:w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded flex-shrink-0"
                   />
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-900">{guest.name}</div>
-                    <div className="text-sm text-gray-500">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-gray-900 text-sm sm:text-base truncate">{guest.name}</div>
+                    <div className="text-xs sm:text-sm text-gray-500">
                       {guest.ladies} Ladies, {guest.gents} Gents, {guest.children} Children
                     </div>
                   </div>
@@ -307,88 +307,90 @@ export default function FunctionInviteManager({
         )}
 
         {availableGuests.length === 0 && (
-          <p className="text-sm text-gray-500 mb-4">All guests have been invited to this function.</p>
+          <p className="text-xs sm:text-sm text-gray-500 mb-4">All guests have been invited to this function.</p>
         )}
       </div>
 
       {/* Invites Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Guest Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Ladies Invited
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Gents Invited
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Children Invited
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {invites.map((invite) => {
-              const isUpdating = updatingIds.has(invite.id)
-              if (!invite.guest) return null // Skip if guest is not loaded
-              return (
-                <tr key={invite.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {invite.guest.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <input
-                      type="number"
-                      min="0"
-                      value={invite.ladiesInvited}
-                      onChange={(e) => handleInviteUpdate(invite.id, 'ladiesInvited', parseInt(e.target.value) || 0)}
-                      disabled={isUpdating}
-                      className="w-20 px-2 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
-                    />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <input
-                      type="number"
-                      min="0"
-                      value={invite.gentsInvited}
-                      onChange={(e) => handleInviteUpdate(invite.id, 'gentsInvited', parseInt(e.target.value) || 0)}
-                      disabled={isUpdating}
-                      className="w-20 px-2 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
-                    />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <input
-                      type="number"
-                      min="0"
-                      value={invite.childrenInvited}
-                      onChange={(e) => handleInviteUpdate(invite.id, 'childrenInvited', parseInt(e.target.value) || 0)}
-                      disabled={isUpdating}
-                      className="w-20 px-2 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
-                    />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={() => handleRemoveInvite(invite.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Remove
-                    </button>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+      <div className="overflow-x-auto -mx-4 sm:mx-0">
+        <div className="inline-block min-w-full align-middle sm:px-0">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Guest Name
+                </th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Ladies
+                </th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Gents
+                </th>
+                <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Children
+                </th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {invites.map((invite) => {
+                const isUpdating = updatingIds.has(invite.id)
+                if (!invite.guest) return null // Skip if guest is not loaded
+                return (
+                  <tr key={invite.id}>
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 max-w-[120px] sm:max-w-none truncate sm:truncate-none">
+                      {invite.guest.name}
+                    </td>
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                      <input
+                        type="number"
+                        min="0"
+                        value={invite.ladiesInvited}
+                        onChange={(e) => handleInviteUpdate(invite.id, 'ladiesInvited', parseInt(e.target.value) || 0)}
+                        disabled={isUpdating}
+                        className="w-16 sm:w-20 px-2 py-2 sm:py-1 border border-gray-300 rounded text-sm disabled:opacity-50 min-h-[44px] sm:min-h-0"
+                      />
+                    </td>
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                      <input
+                        type="number"
+                        min="0"
+                        value={invite.gentsInvited}
+                        onChange={(e) => handleInviteUpdate(invite.id, 'gentsInvited', parseInt(e.target.value) || 0)}
+                        disabled={isUpdating}
+                        className="w-16 sm:w-20 px-2 py-2 sm:py-1 border border-gray-300 rounded text-sm disabled:opacity-50 min-h-[44px] sm:min-h-0"
+                      />
+                    </td>
+                    <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
+                      <input
+                        type="number"
+                        min="0"
+                        value={invite.childrenInvited}
+                        onChange={(e) => handleInviteUpdate(invite.id, 'childrenInvited', parseInt(e.target.value) || 0)}
+                        disabled={isUpdating}
+                        className="w-20 px-2 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
+                      />
+                    </td>
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => handleRemoveInvite(invite.id)}
+                        className="text-red-600 hover:text-red-900 py-1.5 sm:py-0 min-h-[44px] sm:min-h-0"
+                      >
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {invites.length === 0 && (
-        <div className="p-8 text-center text-gray-500">
+        <div className="p-6 sm:p-8 text-center text-gray-500 text-sm">
           No guests invited yet. Add guests using the dropdown above.
         </div>
       )}
