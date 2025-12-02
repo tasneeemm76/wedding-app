@@ -1,33 +1,19 @@
 import { prisma } from '@/lib/prisma'
 import FunctionsTable from '@/components/FunctionsTable'
 
+// Force dynamic rendering to ensure data is always fresh
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function FunctionsPage() {
-  // Try new field names first, fallback to old names if client not regenerated
-  let functions
-  try {
-    functions = await prisma.function.findMany({
-      orderBy: { date: 'asc' },
-      include: {
-        _count: {
-          select: { invites: true, rsvps: true }
-        }
-      }
-    })
-  } catch (error: any) {
-    // Fallback for old client - will need to regenerate
-    console.warn('Using fallback query. Please run: npx prisma generate')
-    functions = await prisma.function.findMany({
-      orderBy: { date: 'asc' }
-    }) as any
-    // Map to expected structure
-    functions = functions.map((f: any) => ({
-      ...f,
+  const functions = await prisma.function.findMany({
+    orderBy: { date: 'asc' },
+    include: {
       _count: {
-        invites: 0,
-        rsvps: 0
+        select: { invites: true, rsvps: true }
       }
-    }))
-  }
+    }
+  })
 
   return (
     <div className="min-h-screen bg-gray-50">

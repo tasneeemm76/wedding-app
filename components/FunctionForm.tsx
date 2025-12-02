@@ -40,19 +40,24 @@ export default function FunctionForm({ functionData, onClose }: FunctionFormProp
         body: JSON.stringify({
           ...formData,
           type: formData.type || null,
-          venue: formData.venue || null
+          venue: formData.venue || null,
+          date: formData.date || null
         })
       })
 
       if (!response.ok) {
-        throw new Error('Failed to save function')
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || 'Failed to save function')
       }
 
+      // Refresh the page data
       router.refresh()
+      // Close the form
       onClose()
     } catch (error) {
       console.error('Error saving function:', error)
-      alert('Failed to save function. Please try again.')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save function. Please try again.'
+      alert(errorMessage)
     } finally {
       setLoading(false)
     }

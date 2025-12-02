@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Function } from '@prisma/client'
 import FunctionForm from './FunctionForm'
@@ -22,6 +22,11 @@ export default function FunctionsTable({ functions: initialFunctions }: Function
   const [showForm, setShowForm] = useState(false)
   const [editingFunction, setEditingFunction] = useState<FunctionWithCount | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  // Update functions when initialFunctions changes (after router.refresh())
+  useEffect(() => {
+    setFunctions(initialFunctions)
+  }, [initialFunctions])
 
   const formatDate = (date: Date | string | null) => {
     if (!date) return '-'
@@ -45,14 +50,17 @@ export default function FunctionsTable({ functions: initialFunctions }: Function
       })
 
       if (response.ok) {
+        // Update local state immediately
         setFunctions(functions.filter(f => f.id !== id))
+        // Refresh server data
         router.refresh()
       } else {
-        alert('Failed to delete function')
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        alert(`Failed to delete function: ${errorData.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error deleting function:', error)
-      alert('Failed to delete function')
+      alert('Failed to delete function. Please try again.')
     } finally {
       setDeletingId(null)
     }
@@ -175,6 +183,7 @@ export default function FunctionsTable({ functions: initialFunctions }: Function
           onClose={() => {
             setShowForm(false)
             setEditingFunction(null)
+            // Refresh to get updated data from server
             router.refresh()
           }}
         />
