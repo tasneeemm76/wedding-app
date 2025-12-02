@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Group {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  guests    Guest[]
+  createdAt DateTime @default(now())
+}
+
+model Guest {
+  id        String   @id @default(cuid())
+  name      String
+  ladies    Int
+  gents     Int
+  children  Int      @default(0)
+  notes     String?
+  groupId   String?
+  group     Group?   @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  invites   Invite[]
+  rsvps     Rsvp[]
+  createdAt DateTime @default(now())
+}
+
+model Function {
+  id      String   @id @default(cuid())
+  name    String
+  type    String?  // Breakfast, Lunch, Dinner
+  date    DateTime?
+  venue   String?
+  invites Invite[]
+  rsvps   Rsvp[]
+}
+
+model Invite {
+  id              String   @id @default(cuid())
+  guestId         String
+  functionId      String
+  ladiesInvited   Int
+  gentsInvited    Int
+  childrenInvited Int
+  guest           Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  function        Function @relation(fields: [functionId], references: [id], onDelete: Cascade)
+  
+  @@unique([guestId, functionId])
+}
+
+model Rsvp {
+  id            String   @id @default(cuid())
+  guestId       String
+  functionId    String
+  ladiesFinal   Int
+  gentsFinal    Int
+  childrenFinal Int
+  notes         String?
+  guest         Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  function      Function @relation(fields: [functionId], references: [id], onDelete: Cascade)
+  
+  @@unique([guestId, functionId])
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  description String
+  amount      Float
+  paidBy      String   // bride | brother | father | mother
+  note        String?
+  createdAt   DateTime @default(now())
+}
