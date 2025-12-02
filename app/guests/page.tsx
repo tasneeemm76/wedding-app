@@ -13,12 +13,13 @@ export default async function GuestsPage({ searchParams }: PageProps) {
   const search = params.search || ''
   const groupFilter = params.group || ''
 
-  // Build where clause
+  // Build where clause with PostgreSQL case-insensitive search
   const where: any = {}
   
   if (search) {
     where.name = {
-      contains: search
+      contains: search,
+      mode: 'insensitive'
     }
   }
 

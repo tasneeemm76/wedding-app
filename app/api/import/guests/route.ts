@@ -36,22 +36,21 @@ export async function POST(
     // Normalize and find or create group (case-insensitive)
     const normalizedGroupName = groupNameInput.trim()
     
-    // SQLite doesn't support case-insensitive mode, so we check manually
-    const allGroups = await prisma.group.findMany()
-    const normalizedInput = normalizedGroupName.toLowerCase()
-    
-    let group = allGroups.find(g => 
-      g.name.toLowerCase() === normalizedInput
-    )
+    // Use PostgreSQL case-insensitive search to find existing group
+    let group = await prisma.group.findFirst({
+      where: {
+        name: {
+          equals: normalizedGroupName,
+          mode: 'insensitive'
+        }
+      }
+    })
 
     if (!group) {
       // Create new group with the exact input (preserving case)
       group = await prisma.group.create({
         data: { name: normalizedGroupName }
       })
-    } else {
-      // Use existing group (preserve original case in database)
-      // group already found above
     }
 
     // Validate file size (limit to 10MB to mitigate DoS risks)

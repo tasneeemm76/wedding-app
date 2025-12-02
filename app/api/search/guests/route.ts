@@ -30,9 +30,15 @@ export async function GET(
   }
 
   try {
-    // SQLite doesn't support case-insensitive mode, so we'll fetch all and filter
-    // For better performance with large datasets, consider using raw SQL with LOWER()
-    const allGuests = await prisma.guest.findMany({
+    // Use PostgreSQL case-insensitive search
+    // First try exact case-insensitive match
+    let guest = await prisma.guest.findFirst({
+      where: {
+        name: {
+          equals: query,
+          mode: 'insensitive'
+        }
+      },
       include: {
         invites: {
           include: {
@@ -47,14 +53,31 @@ export async function GET(
       }
     })
 
-    // Case-insensitive search
-    const queryLower = query.toLowerCase()
-    const matchingGuests = allGuests.filter(g => 
-      g.name.toLowerCase().includes(queryLower)
-    )
-
-    // Find the best match (exact match first, then first result)
-    const guest = matchingGuests.find(g => g.name.toLowerCase() === queryLower) || matchingGuests[0]
+    // If no exact match, try contains search
+    if (!guest) {
+      const matchingGuests = await prisma.guest.findMany({
+        where: {
+          name: {
+            contains: query,
+            mode: 'insensitive'
+          }
+        },
+        include: {
+          invites: {
+            include: {
+              function: true
+            }
+          },
+          rsvps: {
+            include: {
+              function: true
+            }
+          }
+        },
+        take: 1
+      })
+      guest = matchingGuests[0]
+    }
 
     if (!guest) {
       return NextResponse.json({ guest: null, message: 'Guest not found' })
