@@ -2,8 +2,24 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import * as XLSX from 'xlsx'
 
-export async function POST(request: NextRequest) {
+interface ErrorResponse {
+  error: string
+}
 
+// Environment-safe error message helper
+function getErrorMessage(error: unknown, defaultMessage: string): string {
+  if (error instanceof Error) {
+    if (process.env.NODE_ENV === 'production') {
+      return defaultMessage
+    }
+    return error.message
+  }
+  return defaultMessage
+}
+
+export async function POST(
+  request: NextRequest
+): Promise<NextResponse | NextResponse<ErrorResponse>> {
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File
@@ -38,11 +54,69 @@ export async function POST(request: NextRequest) {
       // group already found above
     }
 
+    // Validate file size (limit to 10MB to mitigate DoS risks)
+    const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { error: 'File size exceeds 10MB limit' },
+        { status: 400 }
+      )
+    }
+
+    // Validate file type
+    const validTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel',
+      'text/csv'
+    ]
+    if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls|csv)$/i)) {
+      return NextResponse.json(
+        { error: 'Invalid file type. Please upload an Excel file (.xlsx, .xls) or CSV' },
+        { status: 400 }
+      )
+    }
+
     const arrayBuffer = await file.arrayBuffer()
-    const workbook = XLSX.read(arrayBuffer, { type: 'array' })
+    
+    // Limit workbook parsing to mitigate ReDoS and prototype pollution risks
+    const workbook = XLSX.read(arrayBuffer, { 
+      type: 'array',
+      cellDates: false,
+      cellNF: false,
+      cellStyles: false,
+      sheetStubs: false
+    })
+    
+    if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+      return NextResponse.json(
+        { error: 'Invalid Excel file: no sheets found' },
+        { status: 400 }
+      )
+    }
+    
     const sheetName = workbook.SheetNames[0]
     const worksheet = workbook.Sheets[sheetName]
-    const data = XLSX.utils.sheet_to_json(worksheet)
+    
+    if (!worksheet) {
+      return NextResponse.json(
+        { error: 'Invalid Excel file: sheet not found' },
+        { status: 400 }
+      )
+    }
+    
+    const data = XLSX.utils.sheet_to_json(worksheet, {
+      defval: '',
+      raw: false
+    })
+    
+    // Limit number of rows to process (mitigate DoS)
+    const MAX_ROWS = 10000
+    if (data.length > MAX_ROWS) {
+      return NextResponse.json(
+        { error: `File contains too many rows. Maximum ${MAX_ROWS} rows allowed.` },
+        { status: 400 }
+      )
+    }
 
     let success = 0
     let failed = 0
@@ -75,8 +149,9 @@ export async function POST(request: NextRequest) {
         })
 
         success++
-      } catch (error: any) {
-        errors.push(`Row ${i + 2}: ${error.message || 'Failed to create guest'}`)
+      } catch (error) {
+        const message = getErrorMessage(error, 'Failed to create guest')
+        errors.push(`Row ${i + 2}: ${message}`)
         failed++
       }
     }
@@ -86,10 +161,23 @@ export async function POST(request: NextRequest) {
       failed,
       errors: errors.slice(0, 50) // Limit errors to first 50
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error importing guests:', error)
+    
+    // Handle file parsing errors
+    if (error instanceof Error && (
+      error.message.includes('Cannot read') ||
+      error.message.includes('Invalid') ||
+      error.message.includes('corrupt')
+    )) {
+      return NextResponse.json(
+        { error: 'Invalid or corrupted Excel file' },
+        { status: 400 }
+      )
+    }
+
     return NextResponse.json(
-      { error: error.message || 'Failed to import guests' },
+      { error: getErrorMessage(error, 'Failed to import guests') },
       { status: 500 }
     )
   }
