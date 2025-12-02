@@ -18,7 +18,7 @@ export default async function DashboardPage() {
     const stats = [
       { name: 'Total Guests', value: totalGuests, color: 'bg-blue-500' },
       { name: 'Total Functions', value: totalFunctions, color: 'bg-purple-500' },
-      { name: 'Total Expenses', value: `$${(totalExpenses._sum.amount || 0).toFixed(2)}`, color: 'bg-red-500' },
+      { name: 'Total Expenses', value: `₹${(totalExpenses._sum.amount || 0).toFixed(2)}`, color: 'bg-red-500' },
       { name: 'Total RSVPs', value: totalRSVPs, color: 'bg-green-500' }
     ]
 

@@ -1,8 +1,11 @@
 import { prisma } from '@/lib/prisma'
 import ExpensesList from '@/components/ExpensesList'
 
-export default async function ExpensesPage() {
+// Force dynamic rendering to ensure data is always fresh
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
+export default async function ExpensesPage() {
   const expenses = await prisma.expense.findMany({
     orderBy: { createdAt: 'desc' }
   })
@@ -15,7 +18,7 @@ export default async function ExpensesPage() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Expenses</h1>
           <div className="text-2xl font-semibold text-gray-900">
-            Total: ${total.toFixed(2)}
+            Total: ₹{total.toFixed(2)}
           </div>
         </div>
         <ExpensesList expenses={expenses} />
