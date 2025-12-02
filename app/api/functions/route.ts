@@ -1,17 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function POST(request: NextRequest) {
+interface CreateFunctionBody {
+  name: string
+  type?: string | null
+  date?: string | null
+  venue?: string | null
+}
+
+interface ErrorResponse {
+  error: string
+}
+
+// Environment-safe error message helper
+function getErrorMessage(error: unknown, defaultMessage: string): string {
+  if (error instanceof Error) {
+    if (process.env.NODE_ENV === 'production') {
+      return defaultMessage
+    }
+    return error.message
+  }
+  return defaultMessage
+}
+
+export async function POST(
+  request: NextRequest
+): Promise<NextResponse | NextResponse<ErrorResponse>> {
   try {
-    const body = await request.json()
+    const body: CreateFunctionBody = await request.json()
     const { name, type, date, venue } = body
 
-    if (!name) {
-      return NextResponse.json({ error: 'Function name is required' }, { status: 400 })
+    if (!name || typeof name !== 'string' || name.trim() === '') {
+      return NextResponse.json(
+        { error: 'Function name is required' },
+        { status: 400 }
+      )
     }
 
-    const functionData: any = {
-      name,
+    const functionData: {
+      name: string
+      type: string | null
+      venue: string | null
+      date?: Date
+    } = {
+      name: name.trim(),
       type: type || null,
       venue: venue || null
     }
@@ -24,11 +56,20 @@ export async function POST(request: NextRequest) {
       data: functionData
     })
 
-    return NextResponse.json(newFunction)
-  } catch (error: any) {
+    return NextResponse.json(newFunction, { status: 201 })
+  } catch (error) {
     console.error('Error creating function:', error)
+
+    // Handle JSON parsing errors
+    if (error instanceof SyntaxError || (error instanceof Error && error.message.includes('JSON'))) {
+      return NextResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 }
+      )
+    }
+
     return NextResponse.json(
-      { error: error.message || 'Failed to create function' },
+      { error: getErrorMessage(error, 'Failed to create function') },
       { status: 500 }
     )
   }

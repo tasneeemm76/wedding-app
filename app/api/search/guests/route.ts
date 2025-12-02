@@ -1,55 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function GET(request: NextRequest) {
+interface ErrorResponse {
+  error: string
+}
 
+// Environment-safe error message helper
+function getErrorMessage(error: unknown, defaultMessage: string): string {
+  if (error instanceof Error) {
+    if (process.env.NODE_ENV === 'production') {
+      return defaultMessage
+    }
+    return error.message
+  }
+  return defaultMessage
+}
+
+export async function GET(
+  request: NextRequest
+): Promise<NextResponse | NextResponse<ErrorResponse>> {
   const searchParams = request.nextUrl.searchParams
   const query = searchParams.get('q')
 
   if (!query || query.trim() === '') {
-    return NextResponse.json({ error: 'Query parameter required' }, { status: 400 })
+    return NextResponse.json(
+      { error: 'Query parameter required' },
+      { status: 400 }
+    )
   }
 
   try {
     // SQLite doesn't support case-insensitive mode, so we'll fetch all and filter
     // For better performance with large datasets, consider using raw SQL with LOWER()
-    // Try new field names, with fallback
-    let allGuests
-    try {
-      allGuests = await prisma.guest.findMany({
-        include: {
-          invites: {
-            include: {
-              function: true
-            }
-          },
-          rsvps: {
-            include: {
-              function: true
-            }
+    const allGuests = await prisma.guest.findMany({
+      include: {
+        invites: {
+          include: {
+            function: true
+          }
+        },
+        rsvps: {
+          include: {
+            function: true
           }
         }
-      })
-    } catch (error: any) {
-      // Fallback if client not regenerated
-      console.warn('Prisma client needs regeneration')
-      allGuests = await prisma.guest.findMany({
-        include: {
-          invitations: {
-            include: {
-              function: true,
-              rsvp: true
-            }
-          }
-        }
-      }) as any
-      // Map old structure to new
-      allGuests = allGuests.map((g: any) => ({
-        ...g,
-        invites: g.invitations || [],
-        rsvps: g.invitations?.filter((inv: any) => inv.rsvp).map((inv: any) => inv.rsvp) || []
-      }))
-    }
+      }
+    })
 
     // Case-insensitive search
     const queryLower = query.toLowerCase()
@@ -117,10 +113,10 @@ export async function GET(request: NextRequest) {
           notes: rsvp.notes!
         }))
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error searching guest:', error)
     return NextResponse.json(
-      { error: error.message || 'Failed to search guest' },
+      { error: getErrorMessage(error, 'Failed to search guest') },
       { status: 500 }
     )
   }

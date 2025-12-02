@@ -24,6 +24,18 @@ interface ErrorResponse {
 // Type for params - In Next.js 15+, params are always Promise-based
 type RouteParams = { params: Promise<{ id: string }> }
 
+// Environment-safe error message helper
+function getErrorMessage(error: unknown, defaultMessage: string): string {
+  if (error instanceof Error) {
+    // In production, don't expose internal error details
+    if (process.env.NODE_ENV === 'production') {
+      return defaultMessage
+    }
+    return error.message
+  }
+  return defaultMessage
+}
+
 /**
  * GET /api/functions/[id]
  * Fetch a single function by ID
@@ -53,9 +65,8 @@ export async function GET(
     return NextResponse.json(func)
   } catch (error) {
     console.error('Error fetching function:', error)
-    const message = error instanceof Error ? error.message : 'Failed to fetch function'
     return NextResponse.json(
-      { error: message },
+      { error: getErrorMessage(error, 'Failed to fetch function') },
       { status: 500 }
     )
   }
@@ -124,9 +135,16 @@ export async function PUT(
       )
     }
 
-    const message = error instanceof Error ? error.message : 'Failed to update function'
+    // Handle JSON parsing errors
+    if (error instanceof SyntaxError || (error instanceof Error && error.message.includes('JSON'))) {
+      return NextResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 }
+      )
+    }
+
     return NextResponse.json(
-      { error: message },
+      { error: getErrorMessage(error, 'Failed to update function') },
       { status: 500 }
     )
   }
@@ -175,9 +193,8 @@ export async function DELETE(
       )
     }
 
-    const message = error instanceof Error ? error.message : 'Failed to delete function'
     return NextResponse.json(
-      { error: message },
+      { error: getErrorMessage(error, 'Failed to delete function') },
       { status: 500 }
     )
   }
