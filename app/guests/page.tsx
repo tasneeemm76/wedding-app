@@ -97,6 +97,31 @@ export default async function GuestsPage({ searchParams }: PageProps) {
     }
   })
 
+  // Get all functions for table columns
+  const functions = await prisma.function.findMany({
+    orderBy: { date: 'asc' }
+  })
+
+  // Get all invites for guests
+  const guestIds = guests.map(g => g.id)
+  const invites = await prisma.invite.findMany({
+    where: {
+      guestId: { in: guestIds }
+    },
+    include: {
+      function: true
+    }
+  })
+
+  // Create a map of guestId -> functionId -> invite for quick lookup
+  const inviteMap = new Map<string, Map<string, typeof invites[0]>>()
+  invites.forEach(invite => {
+    if (!inviteMap.has(invite.guestId)) {
+      inviteMap.set(invite.guestId, new Map())
+    }
+    inviteMap.get(invite.guestId)!.set(invite.functionId, invite)
+  })
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
@@ -113,6 +138,8 @@ export default async function GuestsPage({ searchParams }: PageProps) {
           guests={guests} 
           groups={groups}
           labels={labels}
+          functions={functions}
+          inviteMap={inviteMap}
           totalGuests={guests.length}
           search={search}
           groupFilter={groupFilter}

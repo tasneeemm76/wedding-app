@@ -62,21 +62,53 @@ export async function POST(
     }
 
     // Create new invite
-    const invite = await prisma.invite.create({
-      data: {
-        guestId,
-        functionId: id,
-        ladiesInvited: ladiesInvited || 0,
-        gentsInvited: gentsInvited || 0,
-        childrenInvited: childrenInvited || 0
-      },
-      include: {
-        guest: true,
-        function: true
-      }
-    })
+    try {
+      const invite = await prisma.invite.create({
+        data: {
+          guestId,
+          functionId: id,
+          ladiesInvited: ladiesInvited || 0,
+          gentsInvited: gentsInvited || 0,
+          childrenInvited: childrenInvited || 0
+        },
+        include: {
+          guest: true,
+          function: true
+        }
+      })
 
-    return NextResponse.json(invite, { status: 201 })
+      return NextResponse.json(invite, { status: 201 })
+    } catch (createError: any) {
+      // Handle race condition - if invite was created between check and create
+      if (createError.code === 'P2002') {
+        // Unique constraint violation - invite exists, update it instead
+        const existing = await prisma.invite.findUnique({
+          where: {
+            guestId_functionId: {
+              guestId,
+              functionId: id
+            }
+          }
+        })
+
+        if (existing) {
+          const updated = await prisma.invite.update({
+            where: { id: existing.id },
+            data: {
+              ladiesInvited: ladiesInvited || 0,
+              gentsInvited: gentsInvited || 0,
+              childrenInvited: childrenInvited || 0
+            },
+            include: {
+              guest: true,
+              function: true
+            }
+          })
+          return NextResponse.json(updated)
+        }
+      }
+      throw createError
+    }
   } catch (error) {
     console.error('Error creating/updating invite:', error)
 
@@ -84,6 +116,14 @@ export async function POST(
     if (error instanceof SyntaxError || (error instanceof Error && error.message.includes('JSON'))) {
       return NextResponse.json(
         { error: 'Invalid request body' },
+        { status: 400 }
+      )
+    }
+
+    // Handle Prisma unique constraint
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
+      return NextResponse.json(
+        { error: 'Invite already exists for this guest and function' },
         { status: 400 }
       )
     }
