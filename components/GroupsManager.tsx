@@ -222,7 +222,7 @@ export default function GroupsManager({ groups: initialGroups, labels: initialLa
                         >
                           {gl.label.name}
                           <button
-                            onClick={() => handleRemoveLabelFromGroup(group.id, gl.labelId, gl.id)}
+                            onClick={() => handleRemoveLabelFromGroup(group.id, gl.label.id, gl.id)}
                             disabled={removingLabel === gl.id}
                             className="text-indigo-600 hover:text-indigo-800 disabled:opacity-50"
                             title="Remove label"
