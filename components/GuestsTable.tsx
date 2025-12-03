@@ -2,37 +2,57 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Guest, Group } from '@prisma/client'
+import { Guest, Group, Label } from '@prisma/client'
 
-interface GuestWithGroup extends Guest {
-  group: Group | null
+interface GroupLabel {
+  id: string
+  label: Label
 }
 
-interface GroupWithCount extends Group {
+interface GroupWithLabels extends Group {
+  labels: GroupLabel[]
+}
+
+interface GuestWithGroup extends Guest {
+  group: (GroupWithLabels & { labels: GroupLabel[] }) | null
+}
+
+interface GroupWithCount extends GroupWithLabels {
   _count: {
     guests: number
+  }
+}
+
+interface LabelWithCount extends Label {
+  _count: {
+    groups: number
   }
 }
 
 interface GuestsTableProps {
   guests: GuestWithGroup[]
   groups: GroupWithCount[]
+  labels: LabelWithCount[]
   totalGuests: number
   search: string
   groupFilter: string
+  labelFilter: string
 }
 
 export default function GuestsTable({ 
   guests: initialGuests, 
   groups,
+  labels,
   totalGuests,
   search: initialSearch,
-  groupFilter: initialGroupFilter
+  groupFilter: initialGroupFilter,
+  labelFilter: initialLabelFilter
 }: GuestsTableProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [searchTerm, setSearchTerm] = useState(initialSearch)
   const [groupFilter, setGroupFilter] = useState(initialGroupFilter)
+  const [labelFilter, setLabelFilter] = useState(initialLabelFilter)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [guestToDelete, setGuestToDelete] = useState<GuestWithGroup | null>(null)
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false)
@@ -55,6 +75,16 @@ export default function GuestsTable({
       params.set('group', groupId)
     } else {
       params.delete('group')
+    }
+    router.push(`/guests?${params.toString()}`)
+  }
+
+  const handleLabelFilter = (labelId: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (labelId) {
+      params.set('label', labelId)
+    } else {
+      params.delete('label')
     }
     router.push(`/guests?${params.toString()}`)
   }
@@ -163,6 +193,32 @@ export default function GuestsTable({
           </div>
         </div>
 
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+          <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Filter by Label:</label>
+          <div className="flex gap-2 flex-1 w-full sm:w-auto">
+            <select
+              value={labelFilter}
+              onChange={(e) => handleLabelFilter(e.target.value)}
+              className="flex-1 sm:flex-none px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm min-h-[44px] sm:min-h-0"
+            >
+              <option value="">All Labels</option>
+              {labels.map(label => (
+                <option key={label.id} value={label.id}>
+                  {label.name} ({label._count.groups})
+                </option>
+              ))}
+            </select>
+            {labelFilter && (
+              <button
+                onClick={() => handleLabelFilter('')}
+                className="px-3 py-2.5 sm:py-2 text-sm text-gray-600 hover:text-gray-900 min-h-[44px] sm:min-h-0"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+
         <div className="text-xs sm:text-sm text-gray-600">
           Showing {initialGuests.length} of {totalGuests} guests
         </div>
@@ -204,8 +260,22 @@ export default function GuestsTable({
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 max-w-[120px] sm:max-w-none truncate sm:truncate-none">
                       {guest.name}
                     </td>
-                    <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {guest.group?.name || '-'}
+                    <td className="hidden sm:table-cell px-6 py-4 text-sm text-gray-500">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-medium">{guest.group?.name || '-'}</span>
+                        {guest.group?.labels && guest.group.labels.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {guest.group.labels.map((gl) => (
+                              <span
+                                key={gl.id}
+                                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800"
+                              >
+                                {gl.label.name}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {guest.ladies}

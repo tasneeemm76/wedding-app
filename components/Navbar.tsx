@@ -8,6 +8,7 @@ import GlobalSearch from './GlobalSearch'
 const navItems = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/guests', label: 'Guests' },
+  { href: '/groups', label: 'Groups & Labels' },
   { href: '/functions', label: 'Functions' },
   { href: '/expenses', label: 'Expenses' },
   { href: '/import', label: 'Import Excel' }

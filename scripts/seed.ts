@@ -44,6 +44,25 @@ async function main() {
 
   console.log('Seeded default users')
   console.log('All users have password: password123')
+
+  // Create predefined groups
+  const predefinedGroups = [
+    { name: 'adnan', isPredefined: true },
+    { name: 'tasneem', isPredefined: true },
+    { name: 'zahra', isPredefined: true },
+    { name: 'khozema', isPredefined: true },
+    { name: 'dada&dadi', isPredefined: true }
+  ]
+
+  for (const group of predefinedGroups) {
+    await prisma.group.upsert({
+      where: { name: group.name },
+      update: { isPredefined: true }, // Ensure they remain predefined
+      create: group
+    })
+  }
+
+  console.log('Seeded predefined groups: adnan, tasneem, zahra, khozema, dada&dadi')
 }
 
 main()

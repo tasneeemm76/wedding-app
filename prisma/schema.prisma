@@ -11,10 +11,30 @@ datasource db {
 }
 
 model Group {
+  id           String        @id @default(cuid())
+  name         String        @unique
+  isPredefined Boolean       @default(false)
+  guests       Guest[]
+  labels       GroupLabel[]
+  createdAt    DateTime      @default(now())
+}
+
+model Label {
+  id        String       @id @default(cuid())
+  name      String       @unique
+  groups    GroupLabel[]
+  createdAt DateTime     @default(now())
+}
+
+model GroupLabel {
   id        String   @id @default(cuid())
-  name      String   @unique
-  guests    Guest[]
+  groupId   String
+  labelId   String
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  label     Label    @relation(fields: [labelId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+
+  @@unique([groupId, labelId])
 }
 
 model Guest {
